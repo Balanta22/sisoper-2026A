@@ -2,82 +2,41 @@ Consultas realizadas a IA (Claude - Anthropic)
 ===============================================
 Fecha: Mayo 2026
 Asignatura: Sistemas Operativos
-Proyecto: Mini Kernel en C
 
-Durante el desarrollo del proyecto consulté dudas puntuales que
-fui encontrando mientras escribía el código:
+Consulté dudas puntuales mientras desarrollaba el proyecto:
 
--- DUDAS DE SINTAXIS Y LENGUAJE C --
+-- SINTAXIS Y LENGUAJE C --
 
-1. Cómo inicializar correctamente un arreglo de structs en C,
-   no sabía si usar memset o un ciclo for. La IA explicó que
-   para structs con campos mixtos es más seguro el ciclo for
-   asignando campo por campo.
+1. Usaba == para comparar strings y nunca encontraba los archivos,
+   la IA explicó que en C hay que usar strcmp.
 
-2. Diferencia entre usar strcmp y == para comparar strings,
-   mi código original usaba == y nunca encontraba los archivos
-   aunque existían. La IA explicó que en C los strings son
-   punteros y == compara direcciones, no contenido.
+2. Cómo inicializar el arreglo de structs, opté por ciclo for
+   asignando campo por campo en lugar de memset.
 
-3. Cómo declarar correctamente los prototipos de funciones en
-   kernel.c para llamar funciones definidas en otros archivos.
-   Tenía errores de "implicit declaration of function" porque
-   los había puesto después del main.
+3. "implicit declaration of function" porque los prototipos de
+   los otros módulos los había puesto después del main en kernel.c.
 
--- ERRORES DE COMPILACIÓN QUE TUVE --
+-- ERRORES DE COMPILACION --
 
-4. Error: "cc1: fatal error: memory.c No such file or directory"
-   porque intenté compilar sin tener todos los archivos en la
-   misma carpeta. La IA me recordó verificar con ls antes de
-   compilar.
+4. "No such file or directory" al compilar porque no tenía todos
+   los .c en la misma carpeta del proyecto.
 
-5. Warning: "control reaches end of non-void function" en una
-   función que debía retornar int pero en algunos caminos no
-   retornaba nada. Lo corregí agregando return al final.
+5. "conflicting types" entre char* y char[] en los prototipos,
+   la IA aclaró que son equivalentes pero deben ser consistentes.
 
-6. Error: "conflicting types for function" porque el prototipo
-   en kernel.c decía void abrir_archivo(char*) pero la definición
-   en files.c usaba char nombre[]. La IA explicó que en C ambas
-   formas son equivalentes pero deben ser consistentes.
+6. Warning "control reaches end of non-void function" en una
+   función que no retornaba nada en todos los caminos.
 
-7. Segmentation fault al intentar escribir en un archivo recién
-   creado sin haberlo abierto primero. Pregunté por qué fallaba
-   y la IA me mostró que faltaba validar el campo abierto antes
-   de permitir escritura.
+-- ERRORES DE LOGICA --
 
--- DUDAS DE LÓGICA --
+7. Segmentation fault al escribir en archivo recién creado,
+   faltaba validar que estuviera abierto antes de escribir.
 
-8. Cómo limpiar el salto de línea '\n' que deja fgets al leer
-   desde stdin. Mi programa guardaba los nombres con un salto
-   al final y strcmp nunca los encontraba. La solución fue
-   reemplazar el '\n' por '\0' con una función auxiliar.
+8. El '\n' de fgets dañaba las búsquedas por nombre, lo resolví
+   reemplazándolo por '\0' antes de cada llamada.
 
-9. Cómo simular el bloqueo de un archivo en uso para que otro
-   proceso no pueda acceder. Usé un campo entero llamado abierto
-   en la struct Archivo, si vale 1 se rechaza cualquier intento
-   de abrirlo o eliminarlo nuevamente.
+9. Al eliminar y recrear un archivo salía contenido basura,
+   faltaba limpiar el campo contenido al reutilizar el slot.
 
-10. Por qué al eliminar un archivo y volver a crearlo con el
-    mismo nombre aparecía con contenido basura. Era porque no
-    estaba haciendo memset del campo contenido al reutilizar
-    el slot del arreglo.
-
-11. Cómo hacer que al terminar un proceso se liberen también
-    sus recursos de memoria automáticamente. La IA sugirió
-    llamar primero liberar_memoria(pid) y luego terminar_proceso(pid)
-    dentro del case del switch en kernel.c.
-
-12. Duda sobre si era mejor usar archivos reales del sistema
-    host o una estructura en memoria. Decidí usar un arreglo
-    de structs en RAM por simplicidad, ya que el enunciado
-    permitía ambas opciones.
-
--- DUDAS DEL INFORME --
-
-13. Cómo explicar con mis palabras la interacción entre memoria,
-    procesos y archivos en un SO real para las preguntas teóricas.
-    La IA me orientó con los conceptos clave que debía mencionar.
-
-14. Qué bibliografía citar para el informe, me recomendó los
-    libros de Silberschatz y Tanenbaum que son los clásicos de
-    sistemas operativos.
+10. Al terminar un proceso no se liberaba su memoria, la solución
+    fue llamar liberar_memoria(pid) antes de terminar_proceso(pid).
